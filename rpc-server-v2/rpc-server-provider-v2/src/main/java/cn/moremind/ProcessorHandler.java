@@ -85,13 +85,18 @@ public class ProcessorHandler implements Runnable{
 
         // 反射调用
         Object[] args = rpcRequest.getParameters(); // 拿到客户端的参数
-        Class<?>[] types = new Class[args.length]; // 获得每个参数的类型
-        for (int i = 0; i < types.length; i++) {
-            types[i] = args[i].getClass();
+        Method method=null;
+        if (args != null) {
+            Class<?>[] types = new Class[args.length]; // 获得每个参数的类型
+            for (int i = 0; i < types.length; i++) {
+                types[i] = args[i].getClass();
+            }
+            Class clazz=Class.forName(rpcRequest.getClassName()); //跟去请求的类进行加载
+            method=clazz.getMethod(rpcRequest.getMethodName(), types); //sayHello, saveUser找到这个类中的方法
+        } else {
+            Class clazz=Class.forName(rpcRequest.getClassName()); //跟去请求的类进行加载
+            method=clazz.getMethod(rpcRequest.getMethodName()); //sayHello, saveUser找到这个类中的方法
         }
-        Class clazz = Class.forName(rpcRequest.getClassName());
-        //clazz.getMethods(); // sayHello saveUser
-        Method method = clazz.getMethod(rpcRequest.getMethodName(), types);
         Object result = method.invoke(service, args);
         return result;
     }
